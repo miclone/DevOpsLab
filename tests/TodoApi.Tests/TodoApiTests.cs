@@ -174,6 +174,21 @@ public sealed class TodoApiTests : IDisposable
         Assert.Equal(2, all!.Count);
     }
 
+    [Fact]
+    public async Task Stats_CountsCompletedAndOpen()
+    {
+        var done = await CreateAsync("Done");
+        await CreateAsync("Open 1");
+        await CreateAsync("Open 2");
+        await _client.PutAsJsonAsync($"/todos/{done.Id}", new UpdateTodoRequest("Done", true));
+
+        var stats = await _client.GetFromJsonAsync<JsonElement>("/todos/stats");
+
+        Assert.Equal(3, stats.GetProperty("total").GetInt32());
+        Assert.Equal(1, stats.GetProperty("completed").GetInt32());
+        Assert.Equal(2, stats.GetProperty("open").GetInt32());
+    }
+
     // ---- Delete -------------------------------------------------------------
 
     [Fact]

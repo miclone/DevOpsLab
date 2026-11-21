@@ -41,6 +41,14 @@ public static class TodoEndpoints
         group.MapDelete("/{id:int}", (int id, ITodoRepository repo) =>
             repo.Delete(id) ? Results.NoContent() : Results.NotFound());
 
+        // GET /todos/stats
+        group.MapGet("/stats", (ITodoRepository repo) =>
+        {
+            var all = repo.GetAll();
+            var completed = all.Count(t => t.IsCompleted);
+            return new { Total = all.Count, Completed = completed, Open = all.Count - completed };
+        });
+
         return group;
     }
 
